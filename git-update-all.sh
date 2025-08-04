@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+# Définition du nom du fichier de log au début du script
+LOG_FILE="git_update.log"
+
 # --- Étape 1: Afficher l'état actuel des branches ---
 
 echo "================================================="
@@ -47,9 +50,6 @@ if [[ "$response" =~ ^(y|yes|o|oui)$ ]]; then
     
     echo "Lancement de la mise à jour..."
     
-    # Nom du fichier de log
-    LOG_FILE="git_update.log"
-
     # Début de l'écriture dans le log
     echo "=================================================" >> "$LOG_FILE"
     echo "Début de la mise à jour le $(date)" >> "$LOG_FILE"
@@ -76,13 +76,13 @@ if [[ "$response" =~ ^(y|yes|o|oui)$ ]]; then
     echo "Mise à jour terminée. Consultez le fichier '$LOG_FILE' pour les détails."
 
 else
-    # Si l'utilisateur répond non ou autre chose
+    # Si l'utilisateur annule, on l'écrit dans le log et on l'affiche à l'écran.
+    echo "Opération annulée par l'utilisateur."
+    
+    echo "" >> "$LOG_FILE"
     echo "=================================================" >> "$LOG_FILE"
     echo "Opération annulée par l'utilisateur le $(date)" >> "$LOG_FILE"
     echo "=================================================" >> "$LOG_FILE"
-    
-    echo ""
-    echo "Opération annulée par l'utilisateur '$LOG_FILE' pour les détails."
 fi
 
 exit 0
