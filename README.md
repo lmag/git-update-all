@@ -20,3 +20,12 @@ Voici un script shell pour Linux qui parcourt tous les sous-répertoires, vérif
     ```
 
 À la fin de l'exécution, un fichier nommé `git_update.log` sera créé (ou mis à jour) dans le même dossier. Il contiendra un historique détaillé de toutes les opérations `git pull` effectuées.
+
+-----
+
+## FAQ
+
+Pourquoi j'ai cette erreur "bash: ./update_git_all.sh : /bin/bash^M : mauvais interpréteur: Aucun fichier ou dossier de ce type"
+
+L'erreur "mauvais interpréteur" : Aucun fichier ou dossier de ce type est causée par le caractère ^M à la fin de la première ligne de votre script. 
+Solution : On ouvre avec vi et on enregistre 
