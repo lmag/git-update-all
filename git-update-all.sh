@@ -77,8 +77,12 @@ if [[ "$response" =~ ^(y|yes|o|oui)$ ]]; then
 
 else
     # Si l'utilisateur répond non ou autre chose
-    echo "Opération annulée par l'utilisateur."
+    echo "=================================================" >> "$LOG_FILE"
     echo "Opération annulée par l'utilisateur le $(date)" >> "$LOG_FILE"
+    echo "=================================================" >> "$LOG_FILE"
+    
+    echo ""
+    echo "Opération annulée par l'utilisateur '$LOG_FILE' pour les détails."
 fi
 
 exit 0
