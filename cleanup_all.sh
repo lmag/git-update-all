@@ -23,10 +23,8 @@
 # --- Variables de configuration ---
 DOSSIER_SOURCE="git-update-all"
 SCRIPTS_A_NETTOYER=(
+    "git-update-all.sh"
     "install_modules.sh"
-    "deploy_all.sh"
-    "secure_directory.sh"
-    "lancer_et_nettoyer.sh"
 )
 CE_SCRIPT=$(basename "$0")
 
