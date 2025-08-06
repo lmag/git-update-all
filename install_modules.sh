@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+#!/bin/bash
+
 #================================================================
 # Script pour cloner les modules Evarisk et Eoxia depuis GitHub
-# dans des dossiers de destination personnalisés.
+# avec confirmation pour chaque module individuel.
 #================================================================
 
 # --- Couleurs pour les messages ---
@@ -38,46 +40,57 @@ echo -e "${GREEN}L'outil 'git' est bien installé. Démarrage du script...${NC}\
 #===========================
 # Modules Evarisk
 #===========================
-read -p "Voulez-vous installer les modules Evarisk ? (o/N) " response
+read -p "Souhaitez-vous parcourir la liste des modules Evarisk ? (o/N) " response
 if [[ "$response" =~ ^([oO][uU][iI]|[oO]|[yY][eE][sS]|[yY])$ ]]
 then
-    echo -e "\n${YELLOW}--- Installation des modules Evarisk ---${NC}"
+    echo -e "\n${YELLOW}--- Sélection des modules Evarisk ---${NC}"
 
-    # Déclare un tableau associatif: [URL]="NomDuDossier"
     declare -A evarisk_repos=(
         ["https://github.com/Evarisk/Digirisk"]="digiriskdolibarr"
         ["https://github.com/Evarisk/Saturne"]="saturne"
         ["https://github.com/Evarisk/dolicar"]="dolicar"
         ["https://github.com/Evarisk/dolimeet"]="dolimeet"
-        ["https://github.com/Evarisk/digiboard"]="digiboar"
-        ["https://github.com/Evarisk/DoliSecu"]="dolisecu"
-        ["https://github.com/Evarisk/gmao"]="gmao"
+        ["https://github.com/Evarisk/digiboard"]="digiboard"
+        ["https://github.com/Evarisk/DoliSecu"]="dolisecud"
+        ["https://github.com/Evarisk/gmao"]="gmaodolibarr"
     )
 
     for repo_url in "${!evarisk_repos[@]}"
     do
         dir_name="${evarisk_repos[$repo_url]}"
-        echo -e "\nClonage de ${YELLOW}${repo_url}${NC} dans le dossier ${YELLOW}${dir_name}${NC}..."
-        if git clone "$repo_url" "$dir_name"; then
-            echo -e "${GREEN}Succès !${NC}"
+        
+        # --- Confirmation individuelle pour chaque module ---
+        echo # Ligne vide pour une meilleure lisibilité
+        read -p $"Voulez-vous installer le module suivant ?
+  -> Dépôt      : ${YELLOW}${repo_url}${NC}
+  -> Destination : ${YELLOW}${dir_name}${NC}
+   (o/N) " install_confirm
+
+        if [[ "$install_confirm" =~ ^([oO][uU][iI]|[oO]|[yY][eE][sS]|[yY])$ ]]; then
+            echo -e "Clonage en cours..."
+            if git clone "$repo_url" "$dir_name"; then
+                echo -e "${GREEN}Succès !${NC}"
+            else
+                echo -e "${RED}ERREUR lors du clonage de ${repo_url}. Le dossier existe peut-être déjà.${NC}"
+            fi
         else
-            echo -e "${RED}Échec du clonage de ${repo_url}. Le dossier '${dir_name}' existe peut-être déjà.${NC}"
+            echo -e "${YELLOW}Module ignoré.${NC}"
         fi
+        echo "-----------------------------------------------------"
     done
-    echo -e "\n${GREEN}--- Fin de l'installation des modules Evarisk ---${NC}"
+    echo -e "\n${GREEN}--- Fin de la sélection des modules Evarisk ---${NC}"
 else
-    echo -e "${YELLOW}Installation des modules Evarisk ignorée.${NC}"
+    echo -e "${YELLOW}Installation des modules Evarisk entièrement ignorée.${NC}"
 fi
 
 #===========================
 # Modules Eoxia
 #===========================
-read -p $'\n'"Voulez-vous installer les modules Eoxia ? (o/N) " response
+read -p $'\n'"Souhaitez-vous parcourir la liste des modules Eoxia ? (o/N) " response
 if [[ "$response" =~ ^([oO][uU][iI]|[oO]|[yY][eE][sS]|[yY])$ ]]
 then
-    echo -e "\n${YELLOW}--- Installation des modules Eoxia ---${NC}"
+    echo -e "\n${YELLOW}--- Sélection des modules Eoxia ---${NC}"
 
-    # Déclare un tableau associatif: [URL]="NomDuDossier"
     declare -A eoxia_repos=(
         ["https://github.com/Eoxia/WPshop"]="WPshop"
         ["https://github.com/Eoxia/easycrm"]="easycrm"
@@ -88,16 +101,29 @@ then
     for repo_url in "${!eoxia_repos[@]}"
     do
         dir_name="${eoxia_repos[$repo_url]}"
-        echo -e "\nClonage de ${YELLOW}${repo_url}${NC} dans le dossier ${YELLOW}${dir_name}${NC}..."
-        if git clone "$repo_url" "$dir_name"; then
-            echo -e "${GREEN}Succès !${NC}"
+        
+        # --- Confirmation individuelle pour chaque module ---
+        echo
+        read -p $"Voulez-vous installer le module suivant ?
+  -> Dépôt      : ${YELLOW}${repo_url}${NC}
+  -> Destination : ${YELLOW}${dir_name}${NC}
+   (o/N) " install_confirm
+
+        if [[ "$install_confirm" =~ ^([oO][uU][iI]|[oO]|[yY][eE][sS]|[yY])$ ]]; then
+            echo -e "Clonage en cours..."
+            if git clone "$repo_url" "$dir_name"; then
+                echo -e "${GREEN}Succès !${NC}"
+            else
+                echo -e "${RED}ERREUR lors du clonage de ${repo_url}. Le dossier existe peut-être déjà.${NC}"
+            fi
         else
-            echo -e "${RED}Échec du clonage de ${repo_url}. Le dossier '${dir_name}' existe peut-être déjà.${NC}"
+            echo -e "${YELLOW}Module ignoré.${NC}"
         fi
+        echo "-----------------------------------------------------"
     done
-    echo -e "\n${GREEN}--- Fin de l'installation des modules Eoxia ---${NC}"
+    echo -e "\n${GREEN}--- Fin de la sélection des modules Eoxia ---${NC}"
 else
-    echo -e "${YELLOW}Installation des modules Eoxia ignorée.${NC}"
+    echo -e "${YELLOW}Installation des modules Eoxia entièrement ignorée.${NC}"
 fi
 
-echo -e "\n${GREEN}Script terminé !${NC} \n"
+echo -e "\n${GREEN}Script terminé !${NC} 👋\n"
