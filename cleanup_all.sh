@@ -14,24 +14,20 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # =========================================================================
-# Script pour nettoyer l'environnement :
-# 1. Supprime le dossier source 'git-update-all'.
-# 2. Supprime les scripts déployés dans ce répertoire.
-# 3. Donne la commande pour s'auto-détruire.
+# Script pour nettoyer l'environnement de manière sécurisée :
+# 1. Analyse les éléments à supprimer.
+# 2. Affiche la liste des actions réelles et demande confirmation.
+# 3. Exécute la suppression et donne la commande d'auto-destruction.
 # =========================================================================
 
 # --- Variables de configuration ---
 DOSSIER_SOURCE="git-update-all"
-# Liste des scripts que 'deploy_all.sh' a copié ici.
-# Adaptez cette liste si vous ajoutez/supprimez des scripts.
 SCRIPTS_A_NETTOYER=(
     "install_modules.sh"
     "deploy_all.sh"
     "secure_directory.sh"
     "lancer_et_nettoyer.sh"
 )
-
-# Nom de ce script, pour ne pas essayer de se supprimer dans la boucle.
 CE_SCRIPT=$(basename "$0")
 
 # --- Couleurs ---
@@ -39,10 +35,39 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# --- Confirmation ---
-echo -e "${RED}⚠️ ATTENTION : Ce script va supprimer définitivement :${NC}"
-echo -e "  - Le dossier source : ${YELLOW}$DOSSIER_SOURCE${NC}" # <-- CORRIGÉ : Ajout de '-e'
-echo "  - Les scripts déployés listés ci-dessus."
+# --- 1. Phase d'analyse ---
+echo "Analyse des éléments à nettoyer..."
+# On crée un tableau pour stocker les actions qui seront réellement effectuées.
+declare -a actions_a_faire=()
+
+# On vérifie si le dossier source existe.
+if [ -d "$DOSSIER_SOURCE" ]; then
+    actions_a_faire+=("rm -rf ${DOSSIER_SOURCE}")
+fi
+
+# On vérifie pour chaque script s'il existe.
+for script in "${SCRIPTS_A_NETTOYER[@]}"; do
+    if [ -f "$script" ]; then
+        actions_a_faire+=("rm ${script}")
+    fi
+done
+
+# --- 2. Phase de confirmation ---
+# S'il n'y a aucune action à faire, on quitte.
+if [ ${#actions_a_faire[@]} -eq 0 ]; then
+    echo "✅ Tout est déjà propre. Aucune action n'est nécessaire."
+    echo "Il ne reste que ce script. Pour le supprimer, utilisez la commande :"
+    echo -e "    ${YELLOW}rm -- \"$CE_SCRIPT\"${NC}"
+    exit 0
+fi
+
+echo -e "\n${RED}⚠️ ATTENTION : Après confirmation, les commandes suivantes seront exécutées :${NC}"
+# On affiche chaque commande qui sera lancée.
+for cmd in "${actions_a_faire[@]}"; do
+    echo -e "  - ${YELLOW}${cmd}${NC}"
+done
+
+echo "" # Ligne vide
 read -p "Êtes-vous absolument sûr de vouloir continuer ? (o/N) " confirmation
 
 if [[ ! "$confirmation" =~ ^([oO][uU][iI]|[oO]|[yY])$ ]]; then
@@ -50,30 +75,17 @@ if [[ ! "$confirmation" =~ ^([oO][uU][iI]|[oO]|[yY])$ ]]; then
     exit 0
 fi
 
-# --- Phase de nettoyage ---
-echo "Nettoyage en cours..."
-
-# 1. Suppression du dossier source 'git-update-all'
-if [ -d "$DOSSIER_SOURCE" ]; then
-    rm -rf "$DOSSIER_SOURCE"
-    echo "  - Dossier '$DOSSIER_SOURCE' supprimé."
-else
-    echo "  - Dossier '$DOSSIER_SOURCE' non trouvé (déjà supprimé ?)."
-fi
-
-# 2. Suppression des scripts déployés
-for script in "${SCRIPTS_A_NETTOYER[@]}"; do
-    if [ -f "$script" ]; then
-        rm "$script"
-        echo "  - Script '$script' supprimé."
-    fi
+# --- 3. Phase d'exécution ---
+echo "Exécution du nettoyage..."
+for cmd in "${actions_a_faire[@]}"; do
+    eval $cmd # 'eval' exécute la commande stockée dans la variable
+    echo "  - Commande exécutée : '$cmd'"
 done
 
-# --- Instructions finales ---
+# --- 4. Instructions finales ---
 echo -e "\n✅ Nettoyage principal terminé."
 echo "Ce script ne peut pas se supprimer lui-même."
-echo "Pour finaliser le nettoyage, copiez et exécutez la commande simple ci-dessous :"
+echo "Pour finaliser, copiez et exécutez la commande simple ci-dessous :"
 echo ""
-# Affiche la commande finale à copier-coller. 'rm --' est une sécurité.
 echo -e "    ${YELLOW}rm -- \"$CE_SCRIPT\"${NC}"
 echo ""
