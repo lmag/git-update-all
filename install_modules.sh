@@ -16,6 +16,8 @@
 
 #!/bin/bash
 
+#!/bin/bash
+
 #================================================================
 # Script pour cloner les modules Evarisk et Eoxia depuis GitHub
 # avec confirmation pour chaque module individuel.
@@ -51,20 +53,20 @@ then
         ["https://github.com/Evarisk/dolicar"]="dolicar"
         ["https://github.com/Evarisk/dolimeet"]="dolimeet"
         ["https://github.com/Evarisk/digiboard"]="digiboard"
-        ["https://github.com/Evarisk/DoliSecu"]="dolisecud"
-        ["https://github.com/Evarisk/gmao"]="gmaodolibarr"
+        ["https://github.com/Evarisk/DoliSecu"]="dolisecu"
+        ["https://github.com/Evarisk/gmao"]="gmao"
     )
 
     for repo_url in "${!evarisk_repos[@]}"
     do
         dir_name="${evarisk_repos[$repo_url]}"
         
-        # --- Confirmation individuelle pour chaque module ---
+        # --- CORRECTION : Utilisation de 'echo -e' pour l'affichage ---
         echo # Ligne vide pour une meilleure lisibilité
-        read -p $"Voulez-vous installer le module suivant ?
+        echo -e "Voulez-vous installer le module suivant ?
   -> Dépôt      : ${YELLOW}${repo_url}${NC}
-  -> Destination : ${YELLOW}${dir_name}${NC}
-   (o/N) " install_confirm
+  -> Destination : ${YELLOW}${dir_name}${NC}"
+        read -p "   (o/N) " install_confirm
 
         if [[ "$install_confirm" =~ ^([oO][uU][iI]|[oO]|[yY][eE][sS]|[yY])$ ]]; then
             echo -e "Clonage en cours..."
@@ -102,12 +104,12 @@ then
     do
         dir_name="${eoxia_repos[$repo_url]}"
         
-        # --- Confirmation individuelle pour chaque module ---
+        # --- CORRECTION : Utilisation de 'echo -e' pour l'affichage ---
         echo
-        read -p $"Voulez-vous installer le module suivant ?
+        echo -e "Voulez-vous installer le module suivant ?
   -> Dépôt      : ${YELLOW}${repo_url}${NC}
-  -> Destination : ${YELLOW}${dir_name}${NC}
-   (o/N) " install_confirm
+  -> Destination : ${YELLOW}${dir_name}${NC}"
+        read -p "   (o/N) " install_confirm
 
         if [[ "$install_confirm" =~ ^([oO][uU][iI]|[oO]|[yY][eE][sS]|[yY])$ ]]; then
             echo -e "Clonage en cours..."
