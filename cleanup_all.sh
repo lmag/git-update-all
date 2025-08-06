@@ -28,7 +28,7 @@ SCRIPTS_A_NETTOYER=(
     "install_modules.sh"
     "deploy_all.sh"
     "secure_directory.sh"
-    "lancer_et_nettoyer.sh" # Ajout des scripts précédents
+    "lancer_et_nettoyer.sh"
 )
 
 # Nom de ce script, pour ne pas essayer de se supprimer dans la boucle.
@@ -41,7 +41,7 @@ NC='\033[0m'
 
 # --- Confirmation ---
 echo -e "${RED}⚠️ ATTENTION : Ce script va supprimer définitivement :${NC}"
-echo "  - Le dossier source : ${YELLOW}$DOSSIER_SOURCE${NC}"
+echo -e "  - Le dossier source : ${YELLOW}$DOSSIER_SOURCE${NC}" # <-- CORRIGÉ : Ajout de '-e'
 echo "  - Les scripts déployés listés ci-dessus."
 read -p "Êtes-vous absolument sûr de vouloir continuer ? (o/N) " confirmation
 
