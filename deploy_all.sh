@@ -14,7 +14,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # Définit le chemin du fichier de log dans le répertoire parent.
-#!/bin/bash
 
 # Définit le chemin du fichier de log dans le répertoire parent.
 LOG_FILE="../git_update.log"
