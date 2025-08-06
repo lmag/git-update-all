@@ -8,6 +8,7 @@ Ce dépôt contient un ensemble de scripts Bash conçus pour simplifier deux tâ
 
 1.  **Installer des modules en masse** depuis des listes de dépôts GitHub prédéfinies.
 2.  **Déployer rapidement** un ensemble de scripts d'un répertoire de travail vers un répertoire parent.
+3.  **Supprimer directement** avec le script de nettoyage afin de ne rien laisser dans le repertoire, il restera juste le fichier de log
 
 Ces outils ont été conçus pour être interactifs, configurables et fournir des retours clairs à l'utilisateur.
 
