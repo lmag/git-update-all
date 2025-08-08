@@ -25,6 +25,7 @@ DOSSIER_SOURCE="git-update-all"
 SCRIPTS_A_NETTOYER=(
     "git-update-all.sh"
     "install_modules.sh"
+    "update_git_all.sh"
 )
 CE_SCRIPT=$(basename "$0")
 
