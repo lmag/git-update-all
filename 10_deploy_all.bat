@@ -9,8 +9,8 @@ echo Lancement du déploiement de tous les scripts .bat...
 echo (Le script '%SELF_NAME%' sera ignoré)
 
 echo.
-echo Liste des scripts qui seront copiés :
-for %%F in (*.bat) do (
+echo Liste des fichiers qui seront copiés :
+for %%F in (*.bat *.csv) do (
     if /I not "%%F"=="%SELF_NAME%" (
         echo   - %%F
     )
@@ -38,7 +38,7 @@ echo --- Session de déploiement démarrée le %DATE_STR% --- >> "%LOG_FILE%"
 
 set FILES_PROCESSED=0
 
-for %%F in (*.bat) do (
+for %%F in (*.bat *.csv) do (
     if /I not "%%F"=="%SELF_NAME%" (
         echo Traitement de : %%F
         copy /Y "%%F" "..\%%F" >nul
