@@ -54,7 +54,6 @@ then
         ["https://github.com/Evarisk/dolimeet"]="dolimeet"
         ["https://github.com/Evarisk/digiboard"]="digiboard"
         ["https://github.com/Evarisk/DoliSecu"]="dolisecu"
-        ["https://github.com/Evarisk/gmao"]="gmao"
     )
 
     for repo_url in "${!evarisk_repos[@]}"
@@ -95,7 +94,7 @@ then
 
     declare -A eoxia_repos=(
         ["https://github.com/Eoxia/WPshop"]="WPshop"
-        ["https://github.com/Eoxia/easycrm"]="easycrm"
+        ["https://github.com/Eoxia/reedcrm"]="reedcrm"
         ["https://github.com/Eoxia/priseo"]="priseo"
         ["https://github.com/Eoxia/EasyURL"]="EasyURL"
     )
