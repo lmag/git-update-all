@@ -1,0 +1,12 @@
+organisation,branch,repo,dossier_cible,toclone
+Evarisk,"",https://github.com/lmag/digirisk,digiriskdolibarr,1
+Evarisk,"",https://github.com/lmag/saturne,saturne,1
+Evarisk,"",https://github.com/lmag/dolicar,dolicar,1
+Evarisk,"",https://github.com/lmag/dolimeet,dolimeet,1
+Evarisk,"",https://github.com/lmag/digiboard,digiboard,1
+Evarisk,"",https://github.com/lmag/dolisecu,dolisecu,1
+lmag,develop,https://github.com/lmag/digiquali,digiquali,1
+lmag,"",https://github.com/lmag/wpshop,WPshop,1
+lmag,"",https://github.com/lmag/reedcrm,reedcrm,1
+lmag,"",https://github.com/lmag/priseo,priseo,1
+lmag,"",https://github.com/lmag/easyurl,EasyURL,1
