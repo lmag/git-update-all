@@ -54,25 +54,68 @@ for %%O in (!ORG_LIST!) do (
         echo.
         echo --- Sélection des modules %%O ---
         
-        :: Lecture du CSV pour trouver les dépôts de cette organisation
-        for /F "usebackq skip=1 tokens=1,2,3,4,5,6 delims=," %%A in ("%CSV_FILE%") do (
-            if /I "%%A"=="%%O" (
-                
-                set "CHOICE=%%A"
-                set "URL_REPO=%%B"
-                set "CSV_BRANCH=%%~C"
-                set "URL_FORK=%%D"
-                set "DOSSIER=%%E"
-                set "TOCLONE=%%F"
+        rem Détection des modules en mode automatique
+        set "NINJA_COUNT=0"
+        for /F "usebackq skip=1 delims=" %%L in ("%CSV_FILE%") do (
+            set "LINE=%%L"
+            set "LINE=!LINE:,,=,"",!"
+            set "LINE=!LINE:,,=,"",!"
+            for /F "tokens=1,2,3,4,5,6 delims=," %%A in ("!LINE!") do (
+                if /I "%%A"=="%%O" (
+                    if "%%F"=="2" (
+                        set /A NINJA_COUNT+=1
+                        set "NINJA_REPO_!NINJA_COUNT!=%%D"
+                        set "NINJA_DIR_!NINJA_COUNT!=%%E"
+                        set "NINJA_BRANCH_!NINJA_COUNT!=%%~C"
+                    )
+                )
+            )
+        )
+
+        set "RUN_NINJA=0"
+        if !NINJA_COUNT! GTR 0 (
+            echo.
+            echo Dépôt^(s^) configuré^(s^) pour une installation automatique [mode ninja] :
+            for /L %%I in (1,1,!NINJA_COUNT!) do (
+                set "N_BRANCH=!NINJA_BRANCH_%%I!"
+                set "BRANCH_INFO="
+                if not "!N_BRANCH!"=="" if /I not "!N_BRANCH!"=="default" if /I not "!N_BRANCH!"=="\"\"" (
+                    set "BRANCH_INFO= [Branche: !N_BRANCH!]"
+                )
+                echo   - !NINJA_REPO_%%I! -^> !NINJA_DIR_%%I!!BRANCH_INFO!
+            )
+            echo.
+            set ninja_confirm=
+            set /p ninja_confirm="Souhaitez-vous installer automatiquement (mode ninja) ces modules ? (o/N) "
+            if /I "!ninja_confirm!"=="o" set "RUN_NINJA=1"
+            if /I "!ninja_confirm!"=="oui" set "RUN_NINJA=1"
+            if /I "!ninja_confirm!"=="y" set "RUN_NINJA=1"
+            if /I "!ninja_confirm!"=="yes" set "RUN_NINJA=1"
+        )
+
+        rem Lecture du CSV pour trouver les dépôts de cette organisation
+        for /F "usebackq skip=1 delims=" %%L in ("%CSV_FILE%") do (
+            set "LINE=%%L"
+            set "LINE=!LINE:,,=,"",!"
+            set "LINE=!LINE:,,=,"",!"
+            for /F "tokens=1,2,3,4,5,6 delims=," %%A in ("!LINE!") do (
+                if /I "%%A"=="%%O" (
+                    
+                    set "CHOICE=%%A"
+                    set "URL_REPO=%%B"
+                    set "CSV_BRANCH=%%~C"
+                    set "URL_FORK=%%D"
+                    set "DOSSIER=%%E"
+                    set "TOCLONE=%%F"
                 
                 set "TARGET_URL="
                 
-                :: Est-ce que le choix correspond au repo original ?
+                rem Est-ce que le choix correspond au repo original ?
                 echo !URL_REPO! | find /I "!CHOICE!" >nul
                 if !errorlevel! equ 0 (
                     set "TARGET_URL=!URL_REPO!"
                 ) else (
-                    :: Est-ce que le choix correspond au fork ?
+                    rem Est-ce que le choix correspond au fork ?
                     echo !URL_FORK! | find /I "!CHOICE!" >nul
                     if !errorlevel! equ 0 (
                         set "TARGET_URL=!URL_FORK!"
@@ -101,23 +144,30 @@ for %%O in (!ORG_LIST!) do (
                         echo [!DATE_STR!] - IGNORÉ  : Module '!TARGET_URL!' silencieusement ignoré ^(toclone=0^) >> "!LOG_FILE!"
                         echo -----------------------------------------------------
                     ) else if "!TOCLONE!"=="2" (
-                        echo.
-                        echo Installation AUTOMATIQUE du module ^(config toclone=2^) :
-                        echo   -^> Dépôt       : !TARGET_URL!
-                        echo   -^> Destination : !DOSSIER!
-                        if not "!CSV_BRANCH!"=="" if /I not "!CSV_BRANCH!"=="default" echo   -^> Branche     : !CSV_BRANCH!
-                        echo Clonage en cours...
-                        !GIT_CLONE_CMD!
-                        if !errorlevel! equ 0 (
-                            echo ✅ Succès !
-                            set DATE_STR=!date! !time:~0,8!
-                            echo [!DATE_STR!] - SUCCÈS  : Clonage du dépôt '!TARGET_URL!' dans '!DOSSIER!' >> "!LOG_FILE!"
+                        if "!RUN_NINJA!"=="1" (
+                            echo.
+                            echo Installation AUTOMATIQUE du module ^(config toclone=2^) :
+                            echo   -^> Dépôt       : !TARGET_URL!
+                            echo   -^> Destination : !DOSSIER!
+                            if not "!CSV_BRANCH!"=="" if /I not "!CSV_BRANCH!"=="default" echo   -^> Branche     : !CSV_BRANCH!
+                            echo Clonage en cours...
+                            !GIT_CLONE_CMD!
+                            if !errorlevel! equ 0 (
+                                echo ✅ Succès !
+                                set DATE_STR=!date! !time:~0,8!
+                                echo [!DATE_STR!] - SUCCÈS  : Clonage du dépôt '!TARGET_URL!' dans '!DOSSIER!' >> "!LOG_FILE!"
+                            ) else (
+                                echo.
+                                echo ❌ ERREUR : Impossible de cloner !TARGET_URL!
+                                echo    -^> Raisons possibles : Le dépôt n'existe pas, il est privé, ou le dossier cible est déjà pris.
+                                set DATE_STR=!date! !time:~0,8!
+                                echo [!DATE_STR!] - ERREUR  : Échec du clonage du dépôt '!TARGET_URL!' >> "!LOG_FILE!"
+                            )
                         ) else (
                             echo.
-                            echo ❌ ERREUR : Impossible de cloner !TARGET_URL!
-                            echo    -^> Raisons possibles : Le dépôt n'existe pas, il est privé, ou le dossier cible est déjà pris.
+                            echo Module automatique ignoré ^(refus utilisateur^) : !TARGET_URL!
                             set DATE_STR=!date! !time:~0,8!
-                            echo [!DATE_STR!] - ERREUR  : Échec du clonage du dépôt '!TARGET_URL!' >> "!LOG_FILE!"
+                            echo [!DATE_STR!] - IGNORÉ  : Module '!TARGET_URL!' automatique ignoré par l'utilisateur >> "!LOG_FILE!"
                         )
                         echo -----------------------------------------------------
                     ) else (
@@ -159,6 +209,16 @@ for %%O in (!ORG_LIST!) do (
                     )
                 )
             )
+        )
+    )
+        rem Nettoyage des variables ninja
+        if !NINJA_COUNT! GTR 0 (
+            for /L %%I in (1,1,!NINJA_COUNT!) do (
+                set "NINJA_REPO_%%I="
+                set "NINJA_DIR_%%I="
+                set "NINJA_BRANCH_%%I="
+            )
+            set "NINJA_COUNT=0"
         )
         echo.
         echo --- Fin de la sélection des modules %%O ---

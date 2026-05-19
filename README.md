@@ -17,9 +17,13 @@ La suite Windows est la plus avancée. Elle offre une expérience robuste sans d
 ### Fonctionnalités Windows ✨
 * ✅ **Configuration par CSV** : L'intégralité des dépôts à cloner est gérée depuis le fichier `list-repo-to-clone.csv`.
 * ✅ **Logique Intelligente Repo/Fork** : Le script détecte si vous souhaitez cloner le dépôt source ou votre propre fork en analysant les URLs via le mot-clé saisi.
-* ✅ **Modes d'installation** : `0` (Ignorer), `1` (Interactif `o/N`), `2` (Automatique).
+* ✅ **Modes d'installation** : `0` (Ignorer), `1` (Interactif `o/N`), `2` (Automatique / Mode Ninja).
+* ✅ **Mode Ninja (Confirmation Unique)** : Détecte en amont tous les modules configurés pour une installation automatique (`toclone=2`), les présente en liste et demande une confirmation globale unique avant le lancement du clonage.
+* ✅ **Sécurité anti-écrasement** : Le script de déploiement (`10_deploy_all.bat`) détecte si le fichier de configuration `.csv` existe déjà dans le répertoire cible pour ne pas écraser les personnalisations de l'utilisateur.
+* ✅ **Parsing CSV robuste** : Prise en charge robuste des champs vides (comme les colonnes de branches vides) pour éviter tout décalage de colonnes.
 * ✅ **Gestion des branches** : Possibilité de cibler une branche spécifique (ex: `develop`, `v23`) ou de laisser la branche par défaut.
 * ✅ **Journalisation (Logging)** : Toutes les actions sont consignées avec un horodatage précis dans `git_update.log`.
+
 
 ### Utilisation sous Windows
 
@@ -114,3 +118,10 @@ sed -i 's/\r$//' nom_du_script.sh
 2. Passez en mode commande (touche `Échap`)
 3. Tapez `:set fileformat=unix` et appuyez sur `Entrée`.
 4. Sauvegardez et quittez : `:wq`
+
+---
+
+## 🛠️ Dossier d'outillage (Scratch)
+
+Un répertoire `scratch/` (configuré dans le `.gitignore`) est réservé pour le stockage de scripts utilitaires ou de débogage temporaires, garantissant que le dépôt reste propre et exempt de fichiers temporaires de développement.
+
