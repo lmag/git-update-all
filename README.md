@@ -32,7 +32,8 @@ La suite Windows est la plus avancée. Elle offre une expérience robuste sans d
 2. Remontez dans le dossier parent.
 3. **`20_install_modules.bat`** : Lance le moteur de clonage dynamique basé sur le CSV.
 4. **`30_git-update-all.bat`** : Parcourt tous les sous-dossiers existants et effectue un `git pull` pour les mettre à jour.
-5. **`100_cleanup_all.bat`** : Supprime les scripts de maintenance de l'espace de travail (sans affecter vos dépôts).
+5. **`40_git-update-remote-local.bat`** : Met à jour tous vos forks locaux en récupérant les modifications du dépôt original (`upstream`) et les pousse sur votre fork (`origin`).
+6. **`100_cleanup_all.bat`** : Supprime les scripts de maintenance de l'espace de travail (sans affecter vos dépôts).
 
 #### Configuration via CSV (`list-repo-to-clone.csv`)
 Structure stricte : `repo-or-fork,forkedfrom,branch,repo,dossier_cible,toclone`
