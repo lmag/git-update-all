@@ -1,0 +1,156 @@
+@echo off
+chcp 65001 >nul
+setlocal enabledelayedexpansion
+
+set LOG_FILE=git_update.log
+set LOG_FILE_PATH=%CD%\%LOG_FILE%
+set CSV_FILE=list-repo-to-clone.csv
+
+echo =================================================
+echo   Mise à jour des forks (Stash -^> Develop -^> Pull)
+echo =================================================
+echo.
+
+if not exist "%CSV_FILE%" (
+    echo ERREUR : Le fichier '%CSV_FILE%' est introuvable.
+    echo Assurez-vous d'avoir exécuté 10_deploy_all.bat ou d'être dans le bon répertoire.
+    echo.
+    pause
+    exit /b 1
+)
+
+set response=
+set /p response="Voulez-vous mettre à jour tous vos forks (stash, checkout develop, pull upstream) ? [y/N] "
+
+if /I "!response!"=="y" goto :do_update
+if /I "!response!"=="yes" goto :do_update
+if /I "!response!"=="o" goto :do_update
+if /I "!response!"=="oui" goto :do_update
+
+goto :cancel_update
+
+:do_update
+echo Lancement de la mise à jour...
+
+echo ================================================= >> "%LOG_FILE_PATH%"
+set DATE_STR=!date! !time:~0,8!
+echo Début de la mise à jour (Stash, Develop, Pull) le !DATE_STR! >> "%LOG_FILE_PATH%"
+echo ================================================= >> "%LOG_FILE_PATH%"
+
+del /q "%TEMP%\git_summary.txt" 2>nul
+
+for /F "usebackq skip=1 delims=" %%L in ("%CSV_FILE%") do (
+    set "LINE=%%L"
+    set "LINE=!LINE:,,=,"",!"
+    set "LINE=!LINE:,,=,"",!"
+    for /F "tokens=1,2,3,4,5,6 delims=," %%A in ("!LINE!") do (
+        set "URL_UPSTREAM=%%B"
+        set "DOSSIER=%%E"
+        
+        rem Enlève les guillemets si besoin
+        set "URL_UPSTREAM=!URL_UPSTREAM:"=!"
+        set "DOSSIER=!DOSSIER:"=!"
+
+        if not "!DOSSIER!"=="" (
+            if exist "!DOSSIER!\.git\" (
+                echo.
+                echo =================================================
+                echo Mise à jour de : !DOSSIER!
+                echo =================================================
+                echo. >> "%LOG_FILE_PATH%"
+                echo --- Mise à jour de [!DOSSIER!] --- >> "%LOG_FILE_PATH%"
+                
+                pushd "!DOSSIER!" >nul
+                
+                set "RES_STASH=OK"
+                set "RES_BRANCH=develop"
+                set "RES_UPSTREAM=OK"
+                set "RES_PULL=OK"
+                set "RES_PUSH=OK"
+                
+                rem Stash des modifications en cours
+                echo   -^> Git stash...
+                git stash > "%TEMP%\git_temp.log" 2>&1
+                if !errorlevel! neq 0 set "RES_STASH=KO"
+                type "%TEMP%\git_temp.log"
+                type "%TEMP%\git_temp.log" >> "%LOG_FILE_PATH%"
+                
+                rem Checkout de la branche develop
+                echo   -^> Checkout develop...
+                git checkout develop > "%TEMP%\git_temp.log" 2>&1
+                if !errorlevel! neq 0 set "RES_BRANCH=KO"
+                type "%TEMP%\git_temp.log"
+                type "%TEMP%\git_temp.log" >> "%LOG_FILE_PATH%"
+
+                rem Ajoute ou met à jour le remote upstream
+                git remote get-url upstream >nul 2>&1
+                if !errorlevel! equ 0 (
+                    git remote set-url upstream "!URL_UPSTREAM!" >> "%LOG_FILE_PATH%" 2>&1
+                ) else (
+                    git remote add upstream "!URL_UPSTREAM!" >> "%LOG_FILE_PATH%" 2>&1
+                )
+                if !errorlevel! neq 0 set "RES_UPSTREAM=KO"
+                
+                echo   -^> Upstream : !URL_UPSTREAM!
+                
+                rem Pull depuis upstream develop
+                echo   -^> Pull depuis upstream develop...
+                git pull upstream develop > "%TEMP%\git_temp.log" 2>&1
+                if !errorlevel! neq 0 set "RES_PULL=KO"
+                type "%TEMP%\git_temp.log"
+                type "%TEMP%\git_temp.log" >> "%LOG_FILE_PATH%"
+                
+                rem Push vers origin develop
+                echo   -^> Push vers origin develop...
+                git push origin develop > "%TEMP%\git_temp.log" 2>&1
+                if !errorlevel! neq 0 set "RES_PUSH=KO"
+                type "%TEMP%\git_temp.log"
+                type "%TEMP%\git_temp.log" >> "%LOG_FILE_PATH%"
+                echo. >> "%LOG_FILE_PATH%"
+                
+                rem Formatage du résumé
+                set "DIR_PAD=!DOSSIER!                              "
+                set "DIR_PAD=!DIR_PAD:~0,20!"
+                echo !DIR_PAD! ^| Stash:!RES_STASH! ^| Branch:!RES_BRANCH! ^| Upstream:!RES_UPSTREAM! ^| Pull:!RES_PULL! ^| Push:!RES_PUSH! >> "%TEMP%\git_summary.txt"
+                
+                popd >nul
+            ) else (
+                echo   -^> !DOSSIER! ignoré [non cloné ou pas un dépôt Git].
+            )
+        )
+    )
+)
+
+echo.
+echo ================================================= >> "%LOG_FILE_PATH%"
+set DATE_STR=!date! !time:~0,8!
+echo Fin de la mise à jour le !DATE_STR! >> "%LOG_FILE_PATH%"
+echo ================================================= >> "%LOG_FILE_PATH%"
+
+echo.
+echo =================================================
+echo   RÉSUMÉ DES OPÉRATIONS
+echo =================================================
+if exist "%TEMP%\git_summary.txt" (
+    type "%TEMP%\git_summary.txt"
+    del /q "%TEMP%\git_summary.txt"
+)
+echo =================================================
+echo.
+echo ✅ Mise à jour terminée. Consultez le fichier '%LOG_FILE%' pour les détails.
+goto :end
+
+:cancel_update
+echo Opération annulée par l'utilisateur.
+
+echo. >> "%LOG_FILE_PATH%"
+echo ================================================= >> "%LOG_FILE_PATH%"
+set DATE_STR=!date! !time:~0,8!
+echo Opération annulée par l'utilisateur le !DATE_STR! >> "%LOG_FILE_PATH%"
+echo ================================================= >> "%LOG_FILE_PATH%"
+goto :end
+
+:end
+echo.
+pause
+
